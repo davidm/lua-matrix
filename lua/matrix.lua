@@ -1,5 +1,5 @@
 --[[
-	matrix v 0.2.8
+	matrix v 0.2.9
 	
 	Lua 5.1 compatible
 	
@@ -30,20 +30,59 @@
 		where num will be a matrix with the result in mtx[1][1],
 		or use num = vec1:scalar( vec2 ), where num is a number
 		
-	Sites:
-		http://luaforge.net/projects/LuaMatrix
-		http://lua-users.org/wiki/SimpleMatrix
-		
+	Site: http://luamatrix.luaforge.net
+
+	matrix function list:
+
+	matrix.add
+	matrix.columns
+	matrix.concath
+	matrix.concatv
+	matrix.copy
+	matrix.cross
+	matrix.det
+	matrix.div
+	matrix.divnum
+	matrix.dogauss
+	matrix.elementstostring
+	matrix.getelement
+	matrix.gsub
+	matrix.invert
+	matrix.ipairs
+	matrix.latex
+	matrix.len
+	matrix.mul
+	matrix.mulnum
+	matrix:new
+	matrix.normf
+	matrix.normmax
+	matrix.pow
+	matrix.print
+	matrix.random
+	matrix.replace
+	matrix.root
+	matrix.rotl
+	matrix.rotr
+	matrix.round
+	matrix.rows
+	matrix.scalar
+	matrix.setelement
+	matrix.size
+	matrix.solve
+	matrix.sqrt
+	matrix.sub
+	matrix.subm
+	matrix.tostring
+	matrix.transpose
+	matrix.type
+
+	
 	Licensed under the same terms as Lua itself.
 	
 	Developers:
 		Michael Lutz (chillcode)
 		David Manura http://lua-users.org/wiki/DavidManura
 ]]--
-
--- for speed and clearer code load the complex function table
--- in there we define the complex number
-local complex = require "complex"
 
 --////////////
 --// matrix //
@@ -53,13 +92,6 @@ local matrix = {}
 
 -- access to the metatable we set at the end of the file
 local matrix_meta = {}
-
--- access to the symbolic metatable
-local symbol_meta = {}; symbol_meta.__index = symbol_meta
--- set up a symbol type
-local function newsymbol(o)
-	return setmetatable({tostring(o)}, symbol_meta)
-end
 
 --/////////////////////////////
 --// Get 'new' matrix object //
@@ -124,7 +156,7 @@ setmetatable( matrix, { __call = function( ... ) return matrix.new( ... ) end } 
 --// matrix 'matrix' functions //
 --///////////////////////////////
 
---// for real, complx and symbolic matrices //--
+--// for real, complex and symbolic matrices //--
 
 -- note: real and complex matrices may be added, subtracted, etc.
 --		real and symbolic matrices may also be added, subtracted, etc.
@@ -132,33 +164,35 @@ setmetatable( matrix, { __call = function( ... ) return matrix.new( ... ) end } 
 --		since it is not clear which metatable then is used
 
 --// matrix.add ( m1, m2 )
--- Add 2 matrices; m2 may be of bigger size than m1
+-- Add two matrices; m2 may be of bigger size than m1
 function matrix.add( m1, m2 )
 	local mtx = {}
 	for i = 1,#m1 do
-		mtx[i] = {}
+		local m3i = {}
+		mtx[i] = m3i
 		for j = 1,#m1[1] do
-			mtx[i][j] = m1[i][j] + m2[i][j]
+			m3i[j] = m1[i][j] + m2[i][j]
 		end
 	end
 	return setmetatable( mtx, matrix_meta )
 end
 
 --// matrix.sub ( m1 ,m2 )
--- Subtract 2 matrices; m2 may be of bigger size than m1
+-- Subtract two matrices; m2 may be of bigger size than m1
 function matrix.sub( m1, m2 )
 	local mtx = {}
 	for i = 1,#m1 do
-		mtx[i] = {}
+		local m3i = {}
+		mtx[i] = m3i
 		for j = 1,#m1[1] do
-			mtx[i][j] = m1[i][j] - m2[i][j]
+			m3i[j] = m1[i][j] - m2[i][j]
 		end
 	end
 	return setmetatable( mtx, matrix_meta )
 end
 
 --// matrix.mul ( m1, m2 )
--- Multiply 2 matrices; m1 columns must be equal to m2 rows
+-- Multiply two matrices; m1 columns must be equal to m2 rows
 -- e.g. #m1[1] == #m2
 function matrix.mul( m1, m2 )
 	-- multiply rows with columns
@@ -177,7 +211,7 @@ function matrix.mul( m1, m2 )
 end
 
 --//  matrix.div ( m1, m2 )
--- Divide 2 matrices; m1 columns must be equal to m2 rows
+-- Divide two matrices; m1 columns must be equal to m2 rows
 -- m2 must be square, to be inverted,
 -- if that fails returns the rank of m2 as second argument
 -- e.g. #m1[1] == #m2; #m2 == #m2[1]
@@ -189,12 +223,9 @@ end
 
 --// matrix.mulnum ( m1, num )
 -- Multiply matrix with a number
--- num may be of type 'number','complex number' or 'string'
+-- num may be of type 'number' or 'complex number'
 -- strings get converted to complex number, if that fails then to symbol
 function matrix.mulnum( m1, num )
-	if type(num) == "string" then
-		num = complex.to(num) or newsymbol(num)
-	end
 	local mtx = {}
 	-- multiply elements with number
 	for i = 1,#m1 do
@@ -208,18 +239,16 @@ end
 
 --// matrix.divnum ( m1, num )
 -- Divide matrix by a number
--- num may be of type 'number','complex number' or 'string'
+-- num may be of type 'number' or 'complex number'
 -- strings get converted to complex number, if that fails then to symbol
 function matrix.divnum( m1, num )
-	if type(num) == "string" then
-		num = complex.to(num) or newsymbol(num)
-	end
 	local mtx = {}
 	-- divide elements by number
 	for i = 1,#m1 do
-		mtx[i] = {}
+		local mtxi = {}
+		mtx[i] = mtxi
 		for j = 1,#m1[1] do
-			mtx[i][j] = m1[i][j] / num
+			mtxi[j] = m1[i][j] / num
 		end
 	end
 	return setmetatable( mtx, matrix_meta )
@@ -251,6 +280,10 @@ function matrix.pow( m1, num )
 	return mtx
 end
 
+local function number_norm2(x)
+  return x * x
+end
+
 --// matrix.det ( m1 )
 -- Calculate the determinant of a matrix
 -- m1 needs to be square
@@ -261,8 +294,6 @@ end
 -- here we try to get the nearest element to |1|, (smallest pivot element)
 -- os that usually we have |mtx[i][j]/subdet| > 1 or mtx[i][j];
 -- with complex matrices we use the complex.abs function to check if it is bigger or smaller
-local fiszerocomplex = function( cx ) return complex.is(cx,0,0) end
-local fiszeronumber = function( num ) return num == 0 end
 function matrix.det( m1 )
 
 	-- check if matrix is quadratic
@@ -284,16 +315,10 @@ function matrix.det( m1 )
 	end
 	
 	--// no symbolic matrix supported below here
-	
-	local fiszero, abs
-	if matrix.type( m1 ) == "complex" then
-		fiszero = fiszerocomplex
-		abs = complex.mulconjugate
-	else
-		fiszero = fiszeronumber
-		abs = math.abs
-	end
-	
+	local e = m1[1][1]
+	local zero  = type(e) == "table" and e.zero or 0
+	local norm2 = type(e) == "table" and e.norm2 or number_norm2
+
 	--// matrix is bigger than 3x3
 	-- get determinant
 	-- using Gauss elimination and Laplace
@@ -313,12 +338,12 @@ function matrix.det( m1 )
 			-- if no subdet has been found
 			if not subdet then
 				-- check if element it is not zero
-				if not fiszero(e) then
+				if e ~= zero then
 					-- use element as new subdet
 					subdet,xrow = e,i
 				end
 			-- check for elements nearest to 1 or -1
-			elseif (not fiszero(e)) and math.abs(abs(e)-1) < math.abs(abs(subdet)-1) then
+			elseif e ~= zero and math.abs(norm2(e)-1) < math.abs(norm2(subdet)-1) then
 				subdet,xrow = e,i
 			end
 		end
@@ -335,7 +360,7 @@ function matrix.det( m1 )
 			for i = 1,rows-1 do
 				-- factor is the dividor of the first element
 				-- if element is not already zero
-				if not fiszero( mtx[i][j] ) then
+				if mtx[i][j] ~= zero then
 					local factor = mtx[i][j]/subdet
 					-- update all remaining fields of the matrix, with value from xrow
 					for n = j+1,#mtx[1] do
@@ -366,23 +391,23 @@ end
 
 -- locals
 -- checking here for the nearest element to 1 or -1; (smallest pivot element)
--- this way the factor of the evolving number division should be > 1 or the divided number itself,
--- what gives better results
-local setelementtosmallest = function( mtx,i,j,fiszero,fisone,abs )
+-- this way the factor of the evolving number division should be > 1 or the
+-- divided number itself, what gives better results
+local setelementtosmallest = function( mtx,i,j,zero,one,norm2 )
 	-- check if element is one
-	if fisone(mtx[i][j]) then return true end
+	if mtx[i][j] == one then return true end
 	-- check for lowest value
 	local _ilow
 	for _i = i,#mtx do
 		local e = mtx[_i][j]
-		if fisone(e) then
+		if e == one then
 			break
 		end
 		if not _ilow then
-			if not fiszero(e) then
+			if e ~= zero then
 				_ilow = _i
 			end
-		elseif (not fiszero(e)) and math.abs(abs(e)-1) < math.abs(abs(mtx[_ilow][j])-1) then
+		elseif (e ~= zero) and math.abs(norm2(e)-1) < math.abs(norm2(mtx[_ilow][j])-1) then
 			_ilow = _i
 		end
 	end
@@ -395,40 +420,28 @@ local setelementtosmallest = function( mtx,i,j,fiszero,fisone,abs )
 		return true
 	end
 end
-local cxfiszero = function( cx ) return complex.is(cx,0,0) end
-local cxfsetzero = function( mtx,i,j ) complex.set(mtx[i][j],0,0) end
-local cxfisone = function( cx ) return complex.abs(cx) == 1 end
-local cxfsetone = function( mtx,i,j ) complex.set(mtx[i][j],1,0) end
-local numfiszero = function( num ) return num == 0 end
-local numfsetzero = function( mtx,i,j ) mtx[i][j] = 0 end
-local numfisone = function( num ) return math.abs(num) == 1 end
-local numfsetone = function( mtx,i,j ) mtx[i][j] = 1 end
+
+local function copy(x)
+	return type(x) == "table" and x.copy(x) or x
+end
+
 -- note: in --// ... //-- we have a way that does no divison,
 -- however with big number and matrices we get problems since we do no reducing
 function matrix.dogauss( mtx )
-	local fiszero,fsetzero,fisone,fsetone,abs
-	if matrix.type( mtx ) == "complex" then
-		fiszero = cxfiszero
-		fsetzero = cxfsetzero
-		fisone = cxfisone
-		fsetone = cxfsetone
-		abs = complex.mulconjugate
-	else
-		fiszero = numfiszero
-		fsetzero = numfsetzero
-		fisone = numfisone
-		fsetone = numfsetone
-		abs = math.abs
-	end
+	local e = mtx[1][1]
+	local zero = type(e) == "table" and e.zero or 0
+	local one  = type(e) == "table" and e.one  or 1
+	local norm2 = type(e) == "table" and e.norm2 or number_norm2
+
 	local rows,columns = #mtx,#mtx[1]
 	-- stairs left -> right
 	for j = 1,rows do
 		-- check if element can be setted to one
-		if setelementtosmallest( mtx,j,j,fiszero,fisone,abs ) then
+		if setelementtosmallest( mtx,j,j,zero,one,norm2 ) then
 			-- start parsing rows
 			for i = j+1,rows do
 				-- check if element is not already zero
-				if not fiszero(mtx[i][j]) then
+				if mtx[i][j] ~= zero then
 					-- we may add x*otherline row, to set element to zero
 					-- tozero - x*mtx[j][j] = 0; x = tozero/mtx[j][j]
 					local factor = mtx[i][j]/mtx[j][j]
@@ -436,7 +449,7 @@ function matrix.dogauss( mtx )
 					-- yet with big matrices (since we do no reducing and other things)
 					-- we get too big numbers
 					--local factor1,factor2 = mtx[i][j],mtx[j][j] //--
-					fsetzero(mtx,i,j)
+					mtx[i][j] = copy(zero)
 					for _j = j+1,columns do
 						--// mtx[i][_j] = mtx[i][_j] * factor2 - factor1 * mtx[j][_j] //--
 						mtx[i][_j] = mtx[i][_j] - factor * mtx[j][_j]
@@ -459,15 +472,15 @@ function matrix.dogauss( mtx )
 		-- start parsing rows
 		for i = j-1,1,-1 do
 			-- check if element is not already zero			
-			if not fiszero(mtx[i][j]) then
+			if mtx[i][j] ~= zero then
 				local factor = mtx[i][j]
 				for _j = j+1,columns do
 					mtx[i][_j] = mtx[i][_j] - factor * mtx[j][_j]
 				end
-				fsetzero(mtx,i,j)
+				mtx[i][j] = copy(zero)
 			end
 		end
-		fsetone(mtx,j,j)
+		mtx[j][j] = copy(one)
 	end
 	return true
 end
@@ -481,27 +494,14 @@ function matrix.invert( m1 )
 	assert(#m1 == #m1[1], "matrix not square")
 	local mtx = matrix.copy( m1 )
 	local ident = setmetatable( {},matrix_meta )
-	if matrix.type( mtx ) == "complex" then
-		for i = 1,#m1 do
-			ident[i] = {}
-			for j = 1,#m1 do
-				if i == j then
-					ident[i][j] = complex.new( 1,0 )
-				else
-					ident[i][j] = complex.new( 0,0 )
-				end
-			end
-		end
-	else
-		for i = 1,#m1 do
-			ident[i] = {}
-			for j = 1,#m1 do
-				if i == j then
-					ident[i][j] = 1
-				else
-					ident[i][j] = 0
-				end
-			end
+	local e = m1[1][1]
+    local zero = type(e) == "table" and e.zero or 0
+    local one  = type(e) == "table" and e.one  or 1
+	for i = 1,#m1 do
+		local identi = {}
+		ident[i] = identi
+		for j = 1,#m1 do
+			identi[j] = copy((i == j) and one or zero)
 		end
 	end
 	mtx = matrix.concath( mtx,ident )
@@ -527,7 +527,8 @@ end
 -- local average error
 local function get_abs_avg( m1, m2 )
 	local dist = 0
-	local abs = matrix.type(m1) == "complex" and complex.abs or math.abs
+	local e = m1[1][1]
+	local abs = type(e) == "table" and e.abs or math.abs
 	for i=1,#m1 do
 		for j=1,#m1[1] do
 			dist = dist + abs(m1[i][j]-m2[i][j])
@@ -650,7 +651,7 @@ local tround = function( t,mult )
 end
 function matrix.round( mtx, idp )
 	local mult = 10^( idp or 0 )
-	local fround = matrix.type( mtx ) == "number" and numound or tround
+	local fround = matrix.type( mtx ) == "number" and numround or tround
 	for i = 1,#mtx do
 		for j = 1,#mtx[1] do
 			mtx[i][j] = fround(mtx[i][j],mult)
@@ -691,12 +692,10 @@ end
 --// matrix.type ( mtx )
 -- get type of matrix, normal/complex/symbol or tensor
 function matrix.type( mtx )
-	if type(mtx[1][1]) == "table" then
-		if complex.type(mtx[1][1]) then
-			return "complex"
-		end
-		if getmetatable(mtx[1][1]) == symbol_meta then
-			return "symbol"
+	local e = mtx[1][1]
+	if type(e) == "table" then
+		if e.type then
+			return e:type()
 		end
 		return "tensor"
 	end
@@ -766,7 +765,7 @@ function matrix.subm( m1,i1,j1,i2,j2 )
 end
 
 --// matrix.concath( m1, m2 )
--- Concatenate 2 matrices, horizontal
+-- Concatenate two matrices, horizontal
 -- will return m1m2; rows have to be the same
 -- e.g.: #m1 == #m2
 function matrix.concath( m1,m2 )
@@ -787,7 +786,7 @@ function matrix.concath( m1,m2 )
 end
 
 --// matrix.concatv ( m1, m2 )
--- Concatenate 2 matrices, vertical
+-- Concatenate two matrices, vertical
 -- will return	m1
 --					m2
 -- columns have to be the same; e.g.: #m1[1] == #m2[1]
@@ -838,59 +837,32 @@ function matrix.rotr( m1 )
 	return mtx
 end
 
--- local get_elemnts in string
-local get_tstr = function( t )
-	return "["..table.concat(t,",").."]"
-end
-local get_str = function( e )
-	return tostring(e)
-end
--- local get_elemnts in string and formated
-local getf_tstr = function( t,fstr )
+local function tensor_tostring( t,fstr )
+	if not fstr then return "["..table.concat(t,",").."]" end
 	local tval = {}
 	for i,v in ipairs( t ) do
 		tval[i] = string.format( fstr,v )
 	end
 	return "["..table.concat(tval,",").."]"
 end
-local getf_cxstr = function( e,fstr )
-	return complex.tostring( e,fstr )
-end
-local getf_symstr = function( e,fstr )
-	return string.format( fstr,e[1] )
-end
-local getf_str = function( e,fstr )
-	return string.format( fstr,e )
+local function number_tostring( e,fstr )
+	return fstr and string.format( fstr,e ) or e
 end
 
 --// matrix.tostring ( mtx, formatstr )
 -- tostring function
 function matrix.tostring( mtx, formatstr )
 	local ts = {}
-	local getstr
-	if formatstr then -- get str formatted
-		local mtype = matrix.type( mtx )
-		if mtype == "tensor" then getstr = getf_tstr
-		elseif mtype == "complex" then getstr = getf_cxstr
-		elseif mtype == "symbol" then getstr = getf_symstr
-		else getstr = getf_str end
-		-- iteratr
-		for i = 1,#mtx do
-			local tstr = {}
-			for j = 1,#mtx[1] do
-				tstr[j] = getstr(mtx[i][j],formatstr)
-			end
-			ts[i] = table.concat(tstr, "\t")
+	local mtype = matrix.type( mtx )
+	local e = mtx[1][1]
+	local tostring = mtype == "tensor" and tensor_tostring or
+	      type(e) == "table" and e.tostring or number_tostring
+	for i = 1,#mtx do
+		local tstr = {}
+		for j = 1,#mtx[1] do
+			tstr[j] = tostring(mtx[i][j],formatstr)
 		end
-	else
-		getstr = matrix.type( mtx ) == "tensor" and get_tstr or get_str
-		for i = 1,#mtx do
-			local tstr = {}
-			for j = 1,#mtx[1] do
-				tstr[j] = getstr(mtx[i][j])
-			end
-			ts[i] = table.concat(tstr, "\t")
-		end
+		ts[i] = table.concat(tstr, "\t")
 	end
 	return table.concat(ts, "\n")
 end
@@ -909,7 +881,7 @@ function matrix.latex( mtx, align )
 	--		\usepackage{dcolumn}; D{.}{,}{-1}; aligns number by . replaces it with ,
 	local align = align or "c"
 	local str = "$\\left( \\begin{array}{"..string.rep( align, #mtx[1] ).."}\n"
-	local getstr = matrix.type( mtx ) == "tensor" and get_tstr or get_str
+	local getstr = matrix.type( mtx ) == "tensor" and tensor_tostring or number_tostring
 	for i = 1,#mtx do
 		str = str.."\t"..getstr(mtx[i][1])
 		for j = 2,#mtx[1] do
@@ -1014,96 +986,29 @@ function matrix.len( m1 )
 	return math.sqrt( m1[1][1]^2 + m1[2][1]^2 + m1[3][1]^2 )
 end
 
---////////////////////////////////
---// matrix 'complex' functions //
---////////////////////////////////
 
---// matrix.tocomplex ( mtx )
--- we set now all elements to a complex number
--- also set the metatable
-function matrix.tocomplex( mtx )
-	assert( matrix.type(mtx) == "number", "matrix not of type 'number'" )
-	for i = 1,#mtx do
-		for j = 1,#mtx[1] do
-			mtx[i][j] = complex.to( mtx[i][j] )
+--// matrix.replace (mtx, func, ...)
+-- for each element e in the matrix mtx, replace it with func(mtx, ...).
+function matrix.replace( m1, func, ... )
+	local mtx = {}
+	for i = 1,#m1 do
+		local m1i = m1[i]
+		local mtxi = {}
+		for j = 1,#m1i do
+			mtxi[j] = func( m1i[j], ... )
 		end
+		mtx[i] = mtxi
 	end
 	return setmetatable( mtx, matrix_meta )
 end
 
 --// matrix.remcomplex ( mtx )
--- set the matrix elements to a number or complex number string
-function matrix.remcomplex( mtx )
-	assert( matrix.type(mtx) == "complex", "matrix not of type 'complex'" )
-	for i = 1,#mtx do
-		for j = 1,#mtx[1] do
-			mtx[i][j] = complex.tostring( mtx[i][j] )
-		end
-	end
-	return setmetatable( mtx, matrix_meta )
-end
-
---// matrix.conjugate ( m1 )
--- get the conjugate complex matrix
-function matrix.conjugate( m1 )
-	assert( matrix.type(m1) == "complex", "matrix not of type 'complex'" )
-	local mtx = {}
-	for i = 1,#m1 do
-		mtx[i] = {}
-		for j = 1,#m1[1] do
-			mtx[i][j] = complex.conjugate( m1[i][j] )
-		end
-	end
-	return setmetatable( mtx, matrix_meta )
-end
-
---/////////////////////////////////
---// matrix 'symbol' functions //
---/////////////////////////////////
-
---// matrix.tosymbol ( mtx )
--- set the matrix elements to symbolic values
-function matrix.tosymbol( mtx )
-	assert( matrix.type( mtx ) ~= "tensor", "cannot convert type 'tensor' to 'symbol'" )
-	for i = 1,#mtx do
-		for j = 1,#mtx[1] do
-			mtx[i][j] = newsymbol( mtx[i][j] )
-		end
-	end
-	return setmetatable( mtx, matrix_meta )
-end
-
---// matrix.gsub( m1, from, to )
--- perform gsub on all elements
-function matrix.gsub( m1,from,to )
-	assert( matrix.type( m1 ) == "symbol", "matrix not of type 'symbol'" )
-	local mtx = {}
-	for i = 1,#m1 do
-		mtx[i] = {}
-		for j = 1,#m1[1] do
-			mtx[i][j] = newsymbol( string.gsub( m1[i][j][1],from,to ) )
-		end
-	end
-	return setmetatable( mtx, matrix_meta )
-end
-
---// matrix.replace ( m1, ... )
--- replace one letter by something else
--- replace( "a",4,"b",7, ... ) will replace a with 4 and b with 7
-function matrix.replace( m1,... )
-	assert( matrix.type( m1 ) == "symbol", "matrix not of type 'symbol'" )
-	local tosub,args = {},{...}
-	for i = 1,#args,2 do
-		tosub[args[i]] = args[i+1]
-	end
-	local mtx = {}
-	for i = 1,#m1 do
-		mtx[i] = {}
-		for j = 1,#m1[1] do
-			mtx[i][j] = newsymbol( string.gsub( m1[i][j][1], "%a", function( a ) return tosub[a] or a end ) )
-		end
-	end
-	return setmetatable( mtx, matrix_meta )
+-- set the matrix elements to strings
+-- IMPROVE: tostring v.s. tostringelements confusing
+function matrix.elementstostrings( mtx )
+	local e = mtx[1][1]
+	local tostring = type(e) == "table" and e.tostring or tostring
+	return matrix.replace(mtx, tostring)
 end
 
 --// matrix.solve ( m1 )
@@ -1118,46 +1023,6 @@ function matrix.solve( m1 )
 		end
 	end
 	return setmetatable( mtx, matrix_meta )
-end
-
-function symbol_meta.__add(a,b)
-	return newsymbol(a .. "+" .. b)
-end
-
-function symbol_meta.__sub(a,b)
-	return newsymbol(a .. "-" .. b)
-end
-
-function symbol_meta.__mul(a,b)
-	return newsymbol("(" .. a .. ")*(" .. b .. ")")
-end
-
-function symbol_meta.__div(a,b)
-	return newsymbol("(" .. a .. ")/(" .. b .. ")")
-end
-
-function symbol_meta.__pow(a,b)
-	return newsymbol("(" .. a .. ")^(" .. b .. ")")
-end
-
-function symbol_meta.__eq(a,b)
-	return a[1] == b[1]
-end
-
-function symbol_meta.__tostring(a)
-	return a[1]
-end
-
-function symbol_meta.__concat(a,b)
-	return tostring(a) .. tostring(b)
-end
-
-function symbol_meta.abs(a)
-	return newsymbol("(" .. a[1] .. "):abs()")
-end
-
-function symbol_meta.sqrt(a)
-	return newsymbol("(" .. a[1] .. "):sqrt()")
 end
 
 --////////////////////////--
@@ -1232,7 +1097,7 @@ matrix_meta.__eq = function( m1, m2 )
 	if #m1 ~= #m2 or #m1[1] ~= #m2[1] then
 		return false
 	end
-	-- check normal,complex and symbolic
+	-- check elements equal
 	for i = 1,#m1 do
 		for j = 1,#m1[1] do
 			if m1[i][j] ~= m2[i][j] then
@@ -1259,8 +1124,107 @@ for k,v in pairs( matrix ) do
 	matrix_meta.__index[k] = v
 end
 
--- return the matrix and complex
-return matrix, complex
+
+--/////////////////////////////////
+--// symbol class implementation
+--/////////////////////////////////
+
+-- access to the symbolic metatable
+local symbol_meta = {}; symbol_meta.__index = symbol_meta
+local symbol = symbol_meta
+
+function symbol_meta.new(o)
+	return setmetatable({tostring(o)}, symbol_meta)
+end
+symbol_meta.to = symbol_meta.new
+
+-- symbol( arg )
+-- same as symbol.to( arg )
+-- set __call behaviour of symbol
+setmetatable( symbol_meta, { __call = function( _,s ) return symbol_meta.to( s ) end } )
+
+
+-- Converts object to string, optionally with formatting.
+function symbol_meta.tostring( e,fstr )
+	return string.format( fstr,e[1] )
+end
+
+-- Returns "symbol" if object is a symbol type, else nothing.
+function symbol_meta:type()
+	if getmetatable(self) == symbol_meta then
+		return "symbol"
+	end
+end
+
+-- Performs string.gsub on symbol.
+-- for use in matrix.replace
+function symbol_meta:gsub(from, to)
+	return symbol.to( string.gsub( self[1],from,to ) )
+end
+
+-- creates function that replaces one letter by something else
+-- makereplacer( "a",4,"b",7, ... )(x)
+-- will replace a with 4 and b with 7 in symbol x.
+-- for use in matrix.replace
+function symbol_meta.makereplacer( ... )
+	local tosub = {}
+	local args = {...}
+	for i = 1,#args,2 do
+		tosub[args[i]] = args[i+1]
+    end
+	local function func( a ) return tosub[a] or a end
+	return function(sym)
+		return symbol.to( string.gsub( sym[1], "%a", func ) )
+	end
+end
+
+-- applies abs function to symbol
+function symbol_meta.abs(a)
+	return symbol.to("(" .. a[1] .. "):abs()")
+end
+
+-- applies sqrt function to symbol
+function symbol_meta.sqrt(a)
+	return symbol.to("(" .. a[1] .. "):sqrt()")
+end
+
+function symbol_meta.__add(a,b)
+	return symbol.to(a .. "+" .. b)
+end
+
+function symbol_meta.__sub(a,b)
+	return symbol.to(a .. "-" .. b)
+end
+
+function symbol_meta.__mul(a,b)
+	return symbol.to("(" .. a .. ")*(" .. b .. ")")
+end
+
+function symbol_meta.__div(a,b)
+	return symbol.to("(" .. a .. ")/(" .. b .. ")")
+end
+
+function symbol_meta.__pow(a,b)
+	return symbol.to("(" .. a .. ")^(" .. b .. ")")
+end
+
+function symbol_meta.__eq(a,b)
+	return a[1] == b[1]
+end
+
+function symbol_meta.__tostring(a)
+	return a[1]
+end
+
+function symbol_meta.__concat(a,b)
+	return tostring(a) .. tostring(b)
+end
+
+matrix.symbol = symbol
+
+
+-- return matrix
+return matrix
 
 --///////////////--
 --// chillcode //--

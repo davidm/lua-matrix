@@ -8,8 +8,7 @@
 
 -- little add-on to the matrix module, to show some curve fitting
 
--- http://luaforge.net/projects/LuaMatrix
--- http://lua-users.org/wiki/SimpleFit
+-- http://luamatrix.luaforge.net
 
 -- Licensed under the same terms as Lua itself.
 

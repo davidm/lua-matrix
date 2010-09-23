@@ -1,4 +1,6 @@
-local matrix, complex = require "matrix"
+local matrix = require "matrix"
+local complex = require "complex"
+local symbol = matrix.symbol
 
 local mtx, m1,m2,m3,m4,m5, ms,ms1,ms2,ms3,ms4
 
@@ -24,42 +26,42 @@ m1 = matrix{{8,4,1},{6,8,3}}
 m2 = matrix{{-8,1,3},{5,2,1}}
 assert(m1 + m2 == matrix{{0,5,4},{11,10,4}})
 -- matrix.add; complex
-m1 = matrix{{10,"2+6i",1},{5,1,"4-2i"}}:tocomplex()
-m2 = matrix{{3,4,5},{"2+3i",4,"6i"}}:tocomplex()
-assert(m1 + m2 == matrix{{13,"6+6i",6},{"7+3i",5,"4+4i"}}:tocomplex())
+m1 = matrix{{10,"2+6i",1},{5,1,"4-2i"}}:replace(complex)
+m2 = matrix{{3,4,5},{"2+3i",4,"6i"}}:replace(complex)
+assert(m1 + m2 == matrix{{13,"6+6i",6},{"7+3i",5,"4+4i"}}:replace(complex))
 -- matrix.add; symbol
-m1 = matrix{{8,4,1},{6,8,3}}:tosymbol()
-m2 = matrix{{-8,1,3},{5,2,1}}:tosymbol()
-assert(m1 + m2 == matrix{{"8+-8","4+1","1+3"},{"6+5","8+2","3+1"}}:tosymbol())
+m1 = matrix{{8,4,1},{6,8,3}}:replace(symbol)
+m2 = matrix{{-8,1,3},{5,2,1}}:replace(symbol)
+assert(m1 + m2 == matrix{{"8+-8","4+1","1+3"},{"6+5","8+2","3+1"}}:replace(symbol))
 
 -- matrix.sub; number
 m1 = matrix{{8,4,1},{6,8,3}}
 m2 = matrix{{-8,1,3},{5,2,1}}
 assert(m1 - m2 == matrix{{16,3,-2},{1,6,2}})
 -- matrix.sub; complex
-m1 = matrix{{10,"2+6i",1},{5,1,"4-2i"}}:tocomplex()
-m2 = matrix{{3,4,5},{"2+3i",4,"6i"}}:tocomplex()
-assert(m1 - m2 == matrix{{7,"-2+6i",-4},{"3-3i",-3,"4-8i"}}:tocomplex())
+m1 = matrix{{10,"2+6i",1},{5,1,"4-2i"}}:replace(complex)
+m2 = matrix{{3,4,5},{"2+3i",4,"6i"}}:replace(complex)
+assert(m1 - m2 == matrix{{7,"-2+6i",-4},{"3-3i",-3,"4-8i"}}:replace(complex))
 -- matrix.sub; symbol
-m1 = matrix{{8,4,1},{6,8,3}}:tosymbol()
-m2 = matrix{{-8,1,3},{5,2,1}}:tosymbol()
-assert(m1 - m2 == matrix{{"8--8","4-1","1-3"},{"6-5","8-2","3-1"}}:tosymbol())
+m1 = matrix{{8,4,1},{6,8,3}}:replace(symbol)
+m2 = matrix{{-8,1,3},{5,2,1}}:replace(symbol)
+assert(m1 - m2 == matrix{{"8--8","4-1","1-3"},{"6-5","8-2","3-1"}}:replace(symbol))
 
 -- matrix.mul; number
 m1 = matrix{{8,4,1},{6,8,3}}
 m2 = matrix{{3,1},{2,5},{7,4}}
 assert(m1 * m2 == matrix{{39,32},{55,58}})
 -- matrix.mul; complex
-m1 = matrix{{"1+2i","3-i"},{"2-2i","1+i"}}:tocomplex()
-m2 = matrix{{"i","5-i"},{2,"1-i"}}:tocomplex()
-assert( m1*m2 == matrix{{"4-i","9+5i"},{"4+4i","10-12i"}}:tocomplex() )
+m1 = matrix{{"1+2i","3-i"},{"2-2i","1+i"}}:replace(complex)
+m2 = matrix{{"i","5-i"},{2,"1-i"}}:replace(complex)
+assert( m1*m2 == matrix{{"4-i","9+5i"},{"4+4i","10-12i"}}:replace(complex) )
 -- matrix.mul; symbol
-m1 = matrix{{8,4,1},{6,8,3}}:tosymbol()
-m2 = matrix{{3,1},{2,5},{7,4}}:tosymbol()
+m1 = matrix{{8,4,1},{6,8,3}}:replace(symbol)
+m2 = matrix{{3,1},{2,5},{7,4}}:replace(symbol)
 assert(m1 * m2 == matrix{
   {"(8)*(3)+(4)*(2)+(1)*(7)", "(8)*(1)+(4)*(5)+(1)*(4)"},
   {"(6)*(3)+(8)*(2)+(3)*(7)", "(6)*(1)+(8)*(5)+(3)*(4)"}
-}:tosymbol())
+}:replace(symbol))
 
 -- matrix.div; number, same for complex, not for symbol
 m1 = matrix {{1,2},{3,4}}
@@ -72,9 +74,9 @@ assert( m2/2 == matrix{{2,2.5},{3,3.5}} )
 mtx = matrix {{3,5,1},{2,4,5},{1,2,2}}
 assert( 2 / mtx == matrix{{4,16,-42},{-2,-10,26},{0,2,-4}} )
 -- matrix.mulnum; symbol
-m1 = m1:tosymbol()
-assert( m1*2 == matrix{{"(1)*(2)","(2)*(2)"},{"(3)*(2)","(4)*(2)"}}:tosymbol() )
-assert( m1/2 == matrix{{"(1)/(2)","(2)/(2)"},{"(3)/(2)","(4)/(2)"}}:tosymbol() )
+m1 = m1:replace(symbol)
+assert( m1*2 == matrix{{"(1)*(2)","(2)*(2)"},{"(3)*(2)","(4)*(2)"}}:replace(symbol) )
+assert( m1/2 == matrix{{"(1)/(2)","(2)/(2)"},{"(3)/(2)","(4)/(2)"}}:replace(symbol) )
 
 -- matrix.pow; number, same complex
 mtx = matrix{{3,5,1},{2,4,5},{1,2,2}}
@@ -94,8 +96,8 @@ assert(select(2, pcall(function() return mtx^-1 end))
 mtx = matrix {{1,4,3,2},{2,1,-1,-1},{-3,2,2,-2},{-1,-5,-4,1}}
 assert( mtx:det() == 78 )
 -- matrix.det; complex
-m1 = matrix{{"1+2i","3-i"},{"2-2i","1+i"}}:tocomplex()
-m2 = matrix{{"i","5-i"},{2,"1-i"}}:tocomplex()
+m1 = matrix{{"1+2i","3-i"},{"2-2i","1+i"}}:replace(complex)
+m2 = matrix{{"i","5-i"},{2,"1-i"}}:replace(complex)
 m3 = m1*m2
 -- (checked in maple)
 assert( m3:det() == complex "12-114i" )
@@ -104,7 +106,7 @@ mtx = {{"2+3i","1+4i","-2i",3,2},
 	{3,"-2i",6,"4+5i",0},
 	{1,"1+2i",3,5,7},
 	{"-3+3i","3+3i",3,-8,2}}
-matrix(mtx):tocomplex()
+mtx = matrix(mtx):replace(complex)
 -- (checked in maple)
 assert( mtx:det():round(10) == complex "5527+2687i" )
 
@@ -123,7 +125,7 @@ mtx = {
 {3,"-1+5i",-3},
 {4,0,7},
 }
-matrix.tocomplex( mtx )
+mtx = matrix.replace( mtx, complex )
 local mtxinv = mtx^-1
 local mtxinvcomp = {
 {"0.13349-0.07005i","0.14335+0.03609i","0.04237+0.02547i"},
@@ -131,7 +133,7 @@ local mtxinvcomp = {
 {"-0.07628+0.04003i","-0.08192-0.02062i","0.11865-0.01456i"},}
 mtxinvcomp = matrix( mtxinvcomp )
 mtxinv:round( 5 )
-mtxinv:remcomplex()
+mtxinv = mtxinv:elementstostrings()
 assert( mtxinvcomp == mtxinv  )
 
 -- matrix.sqrt; number
@@ -140,7 +142,7 @@ local m2 = m1*m1
 local msqrt = m2:sqrt()
 assert((m2 - msqrt^2):normmax() < 1E-12)
 -- matrix.sqrt; complex
-local m1 = matrix{{4,"2+i",1},{1,5,"4-2i"},{1,"5+3i",2}}:tocomplex()
+local m1 = matrix{{4,"2+i",1},{1,5,"4-2i"},{1,"5+3i",2}}:replace(complex)
 local m2 = m1*m1
 local msqrt = m2:sqrt()
 assert((m2 - msqrt^2):normmax() < 1E-12)
@@ -152,7 +154,7 @@ local m2 = m1^p
 local mroot = m2:root(p)
 assert((m2 - mroot^p):normmax() < 1E-7)
 -- matrix.root; complex
-local m1 = matrix{{4,"2+i",1},{1,5,"4-2i"},{1,"5+3i",2}}:tocomplex()
+local m1 = matrix{{4,"2+i",1},{1,5,"4-2i"},{1,"5+3i",2}}:replace(complex)
 local m2 = m1^p
 local mroot = m2:root(p)
 assert((m2 - mroot^p):normmax() < 1E-7)
@@ -160,16 +162,16 @@ assert((m2 - mroot^p):normmax() < 1E-7)
 -- matrix.normf
 mtx = matrix{{2,3},{-2,-3}}
 assert(mtx:normf() == math.sqrt(2^2+3^2+2^2+3^2))
-mtx = matrix{{'2i','3'},{'-2i','-3'}}:tocomplex()
+mtx = matrix{{'2i','3'},{'-2i','-3'}}:replace(complex)
 assert(mtx:normf() == math.sqrt(2^2+3^2+2^2+3^2))
-mtx = matrix{{'a','b'},{'c','d'}}:tosymbol()
+mtx = matrix{{'a','b'},{'c','d'}}:replace(symbol)
 assert(tostring(mtx:normf()) == "(0+((a):abs())^(2)+((b):abs())^(2)+((c):abs())^(2)+((d):abs())^(2)):sqrt()")
 
 -- matrix.normmax
 -- note: symbolic matrices not supported
 mtx = matrix{{2,3},{-2,-4}}
 assert(mtx:normmax() == 4)
-mtx = matrix{{'2i','3'},{'-2i','-4i'}}:tocomplex()
+mtx = matrix{{'2i','3'},{'-2i','-4i'}}:replace(complex)
 assert(mtx:normmax() == 4)
 
 -- matrix.transpose
@@ -187,7 +189,7 @@ assert( m1:rotr() == matrix{{6,4,2},{7,5,3}} )
 mtx = matrix{{4,2,-3},{3,-5,2}}
 assert(tostring(mtx) == "4\t2\t-3\n3\t-5\t2" )
 -- matrix.tostring; complex
-mtx = matrix{{4,"2+i"},{"3-4i",5}}:tocomplex()
+mtx = matrix{{4,"2+i"},{"3-4i",5}}:replace(complex)
 assert(tostring(mtx) == "4\t2+i\n3-4i\t5" )
 -- matrix.tostring; tensor
 local mt = matrix {{{1,2},{3,4}},{{5,6},{7,8}}}
@@ -216,14 +218,14 @@ assert( vx:scalar( v2 ) == 0 )
 assert( v2:len() == math.sqrt( 3^2+4^2 ) )
 
 --// test symbolic
-ms = matrix {{ "a",1 },{2,"b"}}:tosymbol()
-ms2 = matrix {{ "a",2 },{"b",3}}:tosymbol()
+ms = matrix {{ "a",1 },{2,"b"}}:replace(symbol)
+ms2 = matrix {{ "a",2 },{"b",3}}:replace(symbol)
 ms3 = ms2+ms
-ms3 = ms3:replace( "a",4,"b",2 )
+ms3 = ms3:replace( symbol.makereplacer( "a",4,"b",2 ) )
 ms3 = ms3:solve()
 assert( ms3 == matrix {{8,3},{4,5}} )
 ms4 = ms2*ms
-ms4 = ms4:replace( "a",4,"b",2 )
+ms4 = ms4:replace( symbol.makereplacer( "a",4,"b",2 ) )
 ms4 = ms4:solve()
 assert( ms4 == matrix {{20,8},{14,8}} )
 
@@ -256,3 +258,5 @@ table.sort( t )
 for i,v in ipairs( t ) do
 	--print( "matrix."..v )
 end
+
+print 'PASSED'

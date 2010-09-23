@@ -1,4 +1,4 @@
--- complex 0.3.0
+-- complex 0.3.1
 -- Lua 5.1
 
 -- 'complex' provides common tasks with complex numbers
@@ -15,8 +15,7 @@
 -- the access is faster than in a hash table
 -- the metatable is just a add on, when it comes to speed, one is faster using a direct function call
 
--- http://luaforge.net/projects/LuaMatrix
--- http://lua-users.org/wiki/ComplexNumbers
+-- http://luamatrix.luaforge.net
 
 -- Licensed under the same terms as Lua itself.
 
@@ -191,9 +190,10 @@ function complex.polardeg( cx )
 	return math.sqrt( cx[1]^2 + cx[2]^2 ), math.atan2( cx[2], cx[1] ) / math.pi * 180
 end
 
--- complex.mulconjugate( cx )
--- multiply with conjugate, function returning a number
-function complex.mulconjugate( cx )
+-- complex.norm2( cx )
+-- multiply with conjugate, function returning a scalar number
+-- norm2(x + i*y) returns x^2 + y^2
+function complex.norm2( cx )
 	return cx[1]^2 + cx[2]^2
 end
 
@@ -329,6 +329,10 @@ function complex.round( cx,idp )
 	return setmetatable( { math.floor( cx[1] * mult + 0.5 ) / mult,
 		math.floor( cx[2] * mult + 0.5 ) / mult }, complex_meta )
 end
+
+--// variables
+complex.zero = complex.new(0, 0)
+complex.one  = complex.new(1, 0)
 
 --// metatable functions
 

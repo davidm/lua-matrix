@@ -82,9 +82,9 @@ local r,phi = complex.polardeg( {0,-3} )
 assert( r == 3 )
 assert( phi == -90 )
 
--- complex.mulconjugate( cx )
+-- complex.norm2( cx )
 cx = complex "2+3i"
-assert( complex.mulconjugate( cx ) == 13 )
+assert( complex.norm2( cx ) == 13 )
 
 -- complex.abs( cx )
 cx = complex "3+4i"
@@ -168,7 +168,7 @@ assert( cx:ln():round( 4 ) == complex "1.6094+0.9273i" )
 
 -- complex.exp( cx )
 cx = complex "2+3i"
-assert( cx:ln():exp() == complex "2+3i" )
+assert( cx.abs( cx:ln():exp() - complex "2+3i" ) < 1e-7 )
 
 -- complex.conjugate( cx )
 cx = complex "2+3i"
@@ -183,3 +183,5 @@ assert( cx+2 == complex "4+3i" )
 -- __unm
 cx = complex "2+3i"
 assert( -cx == complex "-2-3i" )
+
+print 'PASSED'

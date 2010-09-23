@@ -1,49 +1,21 @@
-matrix function list:
+matrix changelog
 
-matrix.add
-matrix.columns
-matrix.concath
-matrix.concatv
-matrix.conjugate
-matrix.copy
-matrix.cross
-matrix.det
-matrix.div
-matrix.divnum
-matrix.dogauss
-matrix.getelement
-matrix.gsub
-matrix.invert
-matrix.ipairs
-matrix.latex
-matrix.len
-matrix.mul
-matrix.mulnum
-matrix:new
-matrix.normf
-matrix.normmax
-matrix.pow
-matrix.print
-matrix.random
-matrix.remcomplex
-matrix.replace
-matrix.root
-matrix.rotl
-matrix.rotr
-matrix.round
-matrix.rows
-matrix.scalar
-matrix.setelement
-matrix.size
-matrix.solve
-matrix.sqrt
-matrix.sub
-matrix.subm
-matrix.tocomplex
-matrix.tostring
-matrix.tosymbol
-matrix.transpose
-matrix.type
+v 0.2.9: 2008-08-26
+	[ David Manura ]
+	- decoupled symbol class from matrix class:
+	-   matrix.replace has new semantics, applying a function to each element.
+	      For old behavior: mtx = mtx:replace(matrix.symbol.makereplacer(...))
+	-   replaced mtx:gsub(a,b) with mtx = mtx:replace(symbol.gsub,a,b)
+	-   replaced matrix.tosymbol(mtx) with mtx = mtx:replace(symbol)
+	- eliminated dependency on complex:
+	-   replaced matrix.tocomplex(mtx) with mtx = mtx:replace(complex)
+	-   replaced matrix.conjugate(mtx) with mtx = mtx:replace(complex.conjugate)
+	-   mulnum and divnum no longer can take num of type string
+	-   complex table no longer returned on module load
+	- renamed remcomplex to elementstostrings and changed it to return new
+	    matrix rather than doing in-place modification
+        - Fixed matrix.numround (numround variable mispelled).
+          Reported by Goeff Richards.
 
 v 0.2.8: 2007-08-26
 	[ Michael Lutz ]
