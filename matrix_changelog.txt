@@ -1,0 +1,160 @@
+matrix function list:
+
+matrix.add
+matrix.columns
+matrix.concath
+matrix.concatv
+matrix.conjugate
+matrix.copy
+matrix.cross
+matrix.det
+matrix.div
+matrix.divnum
+matrix.dogauss
+matrix.getelement
+matrix.gsub
+matrix.invert
+matrix.ipairs
+matrix.latex
+matrix.len
+matrix.mul
+matrix.mulnum
+matrix:new
+matrix.normf
+matrix.normmax
+matrix.pow
+matrix.print
+matrix.random
+matrix.remcomplex
+matrix.replace
+matrix.root
+matrix.rotl
+matrix.rotr
+matrix.round
+matrix.rows
+matrix.scalar
+matrix.setelement
+matrix.size
+matrix.solve
+matrix.sqrt
+matrix.sub
+matrix.subm
+matrix.tocomplex
+matrix.tostring
+matrix.tosymbol
+matrix.transpose
+matrix.type
+
+v 0.2.8: 2007-08-26
+	[ Michael Lutz ]
+	- fixed rotr and rotl for rotating type 'complex','symbol' and 'tensor'
+	- mulscalar is now mulnum, divscalar is now divnum, mul/div a complex number or a string,
+		strings first get checked if they can be converted to a complex number (what returns a
+		complex matrix) and if that fails they get converted to a symbol (what returns a symbol matrix)
+	- require "matrix" will return 'matrix, complex' just for convinience
+	- matrix.size will now returns the correct size of tensors
+	- function matrix.div returns rank on failed invertion of m2
+	- function matrix.det, was adjusted to better combine complex and number matrices
+		and made sure it finds the element nearest to 1 or -1
+	- function dogauss, was updated to handle complex and number matrices in one
+	- tweaked some utility functions, should speed up number matrices at least
+	- updated matrix.latex to support all types of matrices
+	- matrix.tostring can now also format the output, and was updated to handle all types better
+	- matrix.print now just calls matrix.tostring
+	- updated test_matrix.lua
+	- added fit (curve fitting to LuaMatrix package)
+	[ David Manura ]
+	- tweaked matrix.sqrt and matrix.root function;
+		replaced "dist1 > dist or dist1 == dist" with "dist1 >= dist"
+	- tweaked get_abs_avg function
+	- added function matrix.normf ( mtx ), returns the norm abs of a matrix
+	- added function matrix.normmax ( mtx ), returns the biggest abs(element)
+	- added __pow to symbol
+	- added abs() and sqrt() to symbol
+	- fixed some global variables, that were allocated
+
+v 0.2.7: 2007-08-19
+	- added __div to metatable and the corresponding matrix functions( matrix.div(m1,m2); matrix.divscalar(m1,num) )
+	- updated square root function, now returns to the matrix the average error of the calculated to the original matrix
+	- added matrix.root function (from David Manura/http://www.dm.unipi.it/~cortona04/slides/bruno.pdf)
+		to calculate any root of a matrix, returns same values as matrix.sqrt
+	- added function matrix.rotl and matrix.rotr, for rotate left and rotate right
+
+v 0.2.6: 2007-08-12
+	- added patch#5 from DavidManura, fixes symbolic matrices handling
+	- added sqrt function to function list, thx David for the hint, that some matrices don't convergent
+	- added print function for rank3 tensors
+	- added solve function, for symbolic matrices, tries to solve a symbolic matrix so that is numeric again
+	- tocomplex converts to a complex matrix, remcomplex removes the complex metatable and returns its
+		string/number value
+
+v 0.2.5: 2007-08-11
+	- added path#4 from DavidManura
+		It contains some doc updates, fixed handling mtx^-1 for singular matrices,
+		and a few checks that can be useful.
+	- added setting up of a vector as matrix{1,2,3}
+
+v 0.2.4
+	- added patch#3 from DavidManura, fixes negative exponent
+	- removed concat, added concath (concat horizontal) and concatv (concat vertical)
+	- removed get from all commands, all commands return a matrix even those only changing
+		the input matrix itself, except getelement and setelement
+	- submatrix is now subm, and dogaussjordan is now dogauss
+	- __tostring returns matrix.tostring, matrix.tostring returns a simple string with the matrix elements
+	- __call; e.g. mtx(arg), will return matrix.print(mtx,arg)
+	- added function matrix.cross( v1,v2 ) to get the cross product of 2 matrices e.g. m1[3][1], m2[3][1]
+		to get the scalar product of these you have to do m1:scalar( m2 );
+		to create a vector do matrix{{ 1,2,3 }}^'T'
+
+v 0.2.3
+	- some optimising, in parts where complex and normal matrix are separate anyways
+	- added patch from DavidManura; matrix^0 returning the identitiy matrix, makes a lot sense
+		print and printf merged, scalar multiply fixed, and __unm and __tostring added, 'good to know'
+
+v 0.2.2
+	updated matrix function to suit new complex functions, function names
+		should become more stable now
+	matrix can now be loaded via local matrix = require "matrix"
+		or local matrix = dofile( "matrixfile" ), but require is better and faster
+		when loading multiple times
+
+v 0.2.1
+	updated matrix functions to suit new complex functions
+
+v 0.2.0
+	changed matrix functions to use the updated
+		complex number functions; makes a lot less code
+		now complex and normal matrices share the same functions
+		one can add/sub/mul complex and normal matrices, returning a complex matrix
+
+v 0.1.6
+	optimised functions a bit
+	changed matrix.getinv to matrix.invert
+	matrix:new is now matrix.new, 'matrix' should only provide functions
+		added mtx = matrix( ... ); as matrix.new( ... )
+	matrix functions only return tables with metatable of first argument matrix
+	changed complex functions to
+		matrix.c<func_name>; e.g. matirx.cadd; matrix.csub
+	added: function matrix.cconjugate, returns the conjuagte complex matrix
+
+v 0.1.5
+	written complex functions from normal matrices
+	added metatable handling for overloading operators
+
+v 0.1.4
+	added complex add on, to be able to handle
+	complex elements in the format declaired in 'complex'
+
+v 0.1.3
+	added many functions also getdet and dogaussjordan
+		only defined one way to get the determinant, so we are
+		slow here in certain cases where matrices have a triangle shape for exsample
+
+v 0.1.2
+	object returns mainly internal errors for lighter code,
+	structure should be no checks
+
+v 0.1.0
+	matrix
+	structure of matrix m[i][j]
+	added simple operations +-..

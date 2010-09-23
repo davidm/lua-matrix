@@ -1,0 +1,55 @@
+
+complex changelog:
+
+v 0.3.0: 2007-08-26
+	- fixed print function
+	- fixed call behaviour of complex number
+	- __unm now directly alters the complex number instead of calling a complex function
+	- changed cmplx to imag (imaginary), for better understand of what is the real
+		and what is the imaginary part
+	- changed convpolar, to take as first argument the radius and second the angle
+		now both have to be given but is more conform to the polar function,
+		that returns radius, phi
+	- updated test_complex.lua
+
+v 0.2.9: 2007-08-13
+	- complex.tonumber is now complex.tostring, it will still return a number
+		if it only has a real part, use tostring( cmplx ) to make sure it
+		always returns a string
+
+v 0.2.8: 2007-08-11
+	- metatable functions such as __add;__sub ... didn't return an error if it couldn't be calculated
+		now the complex.add function will return an error
+	- topolar is not polar, and topolardeg is now polardeg
+	- exp returns now e^(complexnumber)
+	- convpolar returns polar coordinates as carthesic complex number
+	- sqrt now calcs the sqrt of a complex number
+	- added changelog file and *.zip
+v 0.2.7:
+	- optimised functions with ...
+	- complex.len is now complex.abs
+v 0.2.6
+	- optimised metatable functions
+	- added __call behaviour, prints the complex number
+v 0.2.5
+	- added option formatstr in complex.tonumber
+	- added __tostring, is the same as complex.tonumber, but it always returns a string
+	- added __concat so when one does "complex: "..cx, will do the right thing
+		doesn't work with table.concat unfortunatly
+v 0.2.4
+	- changed to normal module loading via require rather than dofile
+		e.g. "local complex = require "complex", if its on the call folder
+		very good so one can decide for oneself to have complex global or local
+	- added license
+	- changed function name tocomplex to complex.to
+v 0.2.3
+	- rewritten tocomplex, clear structure, can be used as 'if tocomplex( arg ) then'
+	- added fast function complex.new( real,cmplx ), not invoking any checks
+v 0.2.2
+	- changed tocomplex, to that it only returns a complex table if the input is
+	either a table holding 2 numbers as first elemenst or a number or a string
+	representing a complex number as defined
+	else it returns nil, so one can do "if tocomplex( arg ) then"
+v 0.2.1 added cx:set( real,complex ) to set real and complex
+	real,complex = cx:get() and cx:is(real,complex)
+built

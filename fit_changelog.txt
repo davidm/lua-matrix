@@ -1,0 +1,7 @@
+fit changelog:
+
+v 0.2: 2007-08-26
+	- some optimising, for the input
+
+v 0.1: 2007-08-11
+	- built from former fit
