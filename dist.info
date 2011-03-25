@@ -1,0 +1,14 @@
+--- This file is part of LuaDist project
+
+name = "luamatrix"
+version = "0.2.8"
+
+desc = "'LuaMatrix' provides a good selection of matrix functions."
+author = "Michael Lutz, David Manura"
+license = "MIT"
+url = "http://luaforge.net/projects/luamatrix/"
+maintainer = "Peter Kapec"
+
+depends = {
+	"lua ~> 5.1"
+}
