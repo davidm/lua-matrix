@@ -18,4 +18,4 @@ install_test ( tests/test_fit.lua )
 install_test ( tests/test.lua )
 install_test ( tests/test_matrix.lua )
 
-add_lua_test ( test/test.lua ) #FIX
+add_lua_test ( tests/test.lua )
