@@ -1,6 +1,6 @@
 --- This file is part of LuaDist project
 
-name = "luamatrix"
+name = "lua-matrix"
 version = "0.2.8"
 
 desc = "'LuaMatrix' provides a good selection of matrix functions."
