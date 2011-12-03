@@ -1,30 +1,65 @@
--- complex 0.3.1
--- Lua 5.1
+--[[
+ 
+LUA MODULE
+ 
+   complex v$(_VERSION) - complex numbers implemented as Lua tables
+ 
+SYNOPSIS
 
--- 'complex' provides common tasks with complex numbers
+  local complex = require 'complex'
+  local cx1 = complex "2+3i" -- or complex.new(2, 3) 
+  local cx2 = complex "3+2i"
+  assert( complex.add(cx1,cx2) == complex "5+5i" )
+  assert( tostring(cx1) == "2+3i" )
+ 
+DESCRIPTION
+ 
+  'complex' provides common tasks with complex numbers
 
--- function complex.to( arg ); complex( arg )
--- returns a complex number on success, nil on failure
--- arg := number or { number,number } or ( "(-)<number>" and/or "(+/-)<number>i" )
---		e.g. 5; {2,3}; "2", "2+i", "-2i", "2^2*3+1/3i"
---		note: 'i' is always in the numerator, spaces are not allowed
+   function complex.to( arg ); complex( arg )
+   returns a complex number on success, nil on failure
+   arg := number or { number,number } or ( "(-)<number>" and/or "(+/-)<number>i" )
+      e.g. 5; {2,3}; "2", "2+i", "-2i", "2^2*3+1/3i"
+      note: 'i' is always in the numerator, spaces are not allowed
 
--- a complex number is defined as carthesic complex number
--- complex number := { real_part, imaginary_part }
--- this gives fast access to both parts of the number for calculation
--- the access is faster than in a hash table
--- the metatable is just a add on, when it comes to speed, one is faster using a direct function call
+  A complex number is defined as Cartesian complex number
+  complex number := { real_part, imaginary_part } .
+  This gives fast access to both parts of the number for calculation.
+  The access is faster than in a hash table
+  The metatable is just an add on.  When it comes to speed, one is faster using a direct function call.
 
--- http://luamatrix.luaforge.net
+API
 
--- Licensed under the same terms as Lua itself.
+  See code and test_complex.lua.
+
+DEPENDENCIES
+
+  None (other than Lua 5.1 or 5.2).
+  
+HOME PAGE
+  
+  http://luamatrix.luaforge.net
+  http://lua-users.org/wiki/LuaMatrix
+
+DOWNLOAD/INSTALL
+
+  ./util.mk
+  cd tmp/*
+  luarocks make
+  
+ Licensed under the same terms as Lua itself.
+ 
+  Developers:
+    Michael Lutz (chillcode)
+    David Manura http://lua-users.org/wiki/DavidManura (maintainer)
+--]]
 
 --/////////////--
 --// complex //--
 --/////////////--
 
 -- link to complex table
-local complex = {}
+local complex = {_TYPE='module', _NAME='complex', _VERSION='0.3.2.20111203'}
 
 -- link to complex metatable
 local complex_meta = {}

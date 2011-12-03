@@ -1,5 +1,8 @@
 matrix changelog
 
+v 0.2.10
+	- Add _VERSION to modules.
+
 v 0.2.9: 2008-08-26
 	[ David Manura ]
 	- decoupled symbol class from matrix class:

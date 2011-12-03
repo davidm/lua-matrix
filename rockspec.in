@@ -1,7 +1,8 @@
-package = "LuaMatrix"
-version = "[VERSION]"
+package = "lua-matrix"
+version = "$(_VERSION)"
 source = {
-   url = "[URL]",
+   url = "git://github.com/davidm/lua-matrix.git",
+   tag='v$(_VERSION)'
 }
 description = {
    summary    = "Matrices and matrix operations implemented in pure Lua.",
@@ -11,11 +12,11 @@ description = {
       Includes a complex number data type too.
    ]],
    license    =  "MIT/X11",
-   homepage   = "http://luamatrix.luaforge.net/",
+   homepage   = "http://lua-users.org/wiki/LuaMatrix",
    maintainer = "David Manura <http://lua-users.org/wiki/DavidManura>",
 }
 dependencies = {
-   "lua >= 5.1",
+   "lua >= 5.1",  -- including 5.2
 }
 build = {
    type = "none",
@@ -28,4 +29,4 @@ build = {
    copy_directories = {"doc", "samples", "tests"},
 }
 -- test: tests/test.lua
-
+-- _VERSION from lua/matrix.lua
