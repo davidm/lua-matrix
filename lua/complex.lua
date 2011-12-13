@@ -91,6 +91,7 @@ function complex.to( num )
 		-- check for real and complex
 		-- number chars [%-%+%*%^%d%./Ee]
 		local real,sign,imag = string.match( num, "^([%-%+%*%^%d%./Ee]*%d)([%+%-])([%-%+%*%^%d%./Ee]*)i$" )
+		local temp1,temp2
 		if real then
 			if string.lower(string.sub(real,1,1)) == "e"
 			or string.lower(string.sub(imag,1,1)) == "e" then
@@ -103,18 +104,22 @@ function complex.to( num )
 					imag = _retminusone
 				end
 			elseif sign == "+" then
-				imag = loadstring("return tonumber("..imag..")")
+				temp1 = tonumber(image)
+				--imag = loadstring("return tonumber("..imag..")")
 			else
-				imag = loadstring("return tonumber("..sign..imag..")")
+				temp1 = tonumber(sign..image)
+				--imag = loadstring("return tonumber("..sign..imag..")")
 			end
-			real = loadstring("return tonumber("..real..")")
-			if real and imag then
-				return setmetatable( { real(),imag() }, complex_meta )
+			--real = loadstring("return tonumber("..real..")")
+			temp2 = tonumber(real)
+			if temp1 and temp2 then
+				return setmetatable( { temp1,temp2 }, complex_meta )
 			end
 			return
 		end
 		-- check for complex
 		local imag = string.match( num,"^([%-%+%*%^%d%./Ee]*)i$" )
+		local temp1
 		if imag then
 			if imag == "" then
 				return setmetatable( { 0,1 }, complex_meta )
@@ -122,19 +127,22 @@ function complex.to( num )
 				return setmetatable( { 0,-1 }, complex_meta )
 			end
 			if string.lower(string.sub(imag,1,1)) ~= "e" then
-				imag = loadstring("return tonumber("..imag..")")
-				if imag then
-					return setmetatable( { 0,imag() }, complex_meta )
+				--imag = loadstring("return tonumber("..imag..")")
+				temp1 = tonumber(imag)
+				if temp1 then
+					return setmetatable( { 0,temp1}, complex_meta )
 				end
 			end
 			return
 		end
 		-- should be real
 		local real = string.match( num,"^(%-*[%d%.][%-%+%*%^%d%./Ee]*)$" )
+		local temp2
 		if real then
-			real = loadstring( "return tonumber("..real..")" )
-			if real then
-				return setmetatable( { real(),0 }, complex_meta )
+			--real = loadstring( "return tonumber("..real..")" )
+			temp2 = tonumber(real)
+			if temp2 then
+				return setmetatable( { temp2,0 }, complex_meta )
 			end
 		end
 	end
@@ -170,7 +178,7 @@ end
 -- complex.convpolardeg( r, phi )
 -- convert polar coordinates ( r*e^(i*phi) ) to carthesic complex number
 -- r (radius) is a number
--- phi must be in degrees; e.g. [0° - 360°]
+-- phi must be in degrees; e.g. [0ï¿½ - 360ï¿½]
 function complex.convpolardeg( radius, phi )
 	phi = phi/180 * math.pi
 	return setmetatable( { radius * math.cos( phi ), radius * math.sin( phi ) }, complex_meta )
@@ -219,7 +227,7 @@ end
 
 -- complex.polardeg( cx )
 -- from complex number to polar coordinates
--- output in degrees; [-180°,180°]
+-- output in degrees; [-180ï¿½,180ï¿½]
 -- returns r (radius), phi (angle)
 function complex.polardeg( cx )
 	return math.sqrt( cx[1]^2 + cx[2]^2 ), math.atan2( cx[2], cx[1] ) / math.pi * 180
