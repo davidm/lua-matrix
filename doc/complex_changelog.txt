@@ -1,5 +1,9 @@
 complex changelog
 
+v 0.3.3: 2011-12-13
+	- Elminate loadstring.  Do parsing manually in complex.to.
+	  String syntax has changed slightly.
+
 v 0.3.2: 2011-12-03
 	- Add _VERSION
 

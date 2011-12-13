@@ -59,16 +59,61 @@ DOWNLOAD/INSTALL
 --/////////////--
 
 -- link to complex table
-local complex = {_TYPE='module', _NAME='complex', _VERSION='0.3.2.20111203'}
+local complex = {_TYPE='module', _NAME='complex', _VERSION='0.3.3.20111212'}
 
 -- link to complex metatable
 local complex_meta = {}
 
+-- helper functions for parsing complex number strings.
+local function parse_scalar(s, pos0)
+	local x, n, pos = s:match('^([+-]?[%d%.]+)(.?)()', pos0)
+	if not x then return end
+	if n == 'e' or n == 'E' then
+		local x2, n2, pos2 = s:match('^([+-]?%d+)(.?)()', pos)
+		if not x2 then error 'number format error' end
+		x = tonumber(x..n..x2)
+		if not x then error 'number format error' end
+		return x, n2, pos2
+	else
+		x = tonumber(x)
+		if not x then error 'number format error' end
+		return x, n, pos
+	end
+end
+local function parse_component(s, pos0)
+	local x, n, pos = parse_scalar(s, pos0)
+	if not x then
+		local x2, n2, pos2 = s:match('^([+-]?)(i)()$', pos0)
+		if not x2 then error 'number format error' end
+		return (x2=='-' and -1 or 1), n2, pos2
+	end
+	if n == '/' then
+		local x2, n2, pos2 = parse_scalar(s, pos)
+		x = x / x2
+		return x, n2, pos2
+	end
+	return x, n, pos
+end
+local function parse_complex(s)
+	local x, n, pos = parse_component(s, 1)
+	if n == '+' or n == '-' then
+		local x2, n2, pos2 = parse_component(s, pos)
+		if n2 ~= 'i' or pos2 ~= #s+1 then error 'number format error' end
+		if n == '-' then x2 = - x2 end
+		return x, x2
+	elseif n == '' then
+		return x, 0
+	elseif n == 'i' then
+		if pos ~= #s+1 then error 'number format error' end
+		return 0, x
+	else
+		error 'number format error'
+	end
+end
+
 -- complex.to( arg )
 -- return a complex number on success
 -- return nil on failure
-local _retone = function() return 1 end
-local _retminusone = function() return -1 end
 function complex.to( num )
 	-- check for table type
 	if type( num ) == "table" then
@@ -88,55 +133,8 @@ function complex.to( num )
 		return setmetatable( { isnum,0 }, complex_meta )
 	end
 	if type( num ) == "string" then
-		-- check for real and complex
-		-- number chars [%-%+%*%^%d%./Ee]
-		local real,sign,imag = string.match( num, "^([%-%+%*%^%d%./Ee]*%d)([%+%-])([%-%+%*%^%d%./Ee]*)i$" )
-		if real then
-			if string.lower(string.sub(real,1,1)) == "e"
-			or string.lower(string.sub(imag,1,1)) == "e" then
-				return
-			end
-			if imag == "" then
-				if sign == "+" then
-					imag = _retone
-				else
-					imag = _retminusone
-				end
-			elseif sign == "+" then
-				imag = loadstring("return tonumber("..imag..")")
-			else
-				imag = loadstring("return tonumber("..sign..imag..")")
-			end
-			real = loadstring("return tonumber("..real..")")
-			if real and imag then
-				return setmetatable( { real(),imag() }, complex_meta )
-			end
-			return
-		end
-		-- check for complex
-		local imag = string.match( num,"^([%-%+%*%^%d%./Ee]*)i$" )
-		if imag then
-			if imag == "" then
-				return setmetatable( { 0,1 }, complex_meta )
-			elseif imag == "-" then
-				return setmetatable( { 0,-1 }, complex_meta )
-			end
-			if string.lower(string.sub(imag,1,1)) ~= "e" then
-				imag = loadstring("return tonumber("..imag..")")
-				if imag then
-					return setmetatable( { 0,imag() }, complex_meta )
-				end
-			end
-			return
-		end
-		-- should be real
-		local real = string.match( num,"^(%-*[%d%.][%-%+%*%^%d%./Ee]*)$" )
-		if real then
-			real = loadstring( "return tonumber("..real..")" )
-			if real then
-				return setmetatable( { real(),0 }, complex_meta )
-			end
-		end
+		local real, imag = parse_complex(num)
+		return setmetatable( { real, imag }, complex_meta )
 	end
 end
 
@@ -170,7 +168,7 @@ end
 -- complex.convpolardeg( r, phi )
 -- convert polar coordinates ( r*e^(i*phi) ) to carthesic complex number
 -- r (radius) is a number
--- phi must be in degrees; e.g. [0° - 360°]
+-- phi must be in degrees; e.g. [0 - 360 deg]
 function complex.convpolardeg( radius, phi )
 	phi = phi/180 * math.pi
 	return setmetatable( { radius * math.cos( phi ), radius * math.sin( phi ) }, complex_meta )
@@ -219,7 +217,7 @@ end
 
 -- complex.polardeg( cx )
 -- from complex number to polar coordinates
--- output in degrees; [-180°,180°]
+-- output in degrees; [-180, 180 deg]
 -- returns r (radius), phi (angle)
 function complex.polardeg( cx )
 	return math.sqrt( cx[1]^2 + cx[2]^2 ), math.atan2( cx[2], cx[1] ) / math.pi * 180

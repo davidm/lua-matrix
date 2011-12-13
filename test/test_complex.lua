@@ -8,16 +8,35 @@ assert( tostring( cx ) == "2+3i" )
 cx = complex ( 2 )
 assert( tostring( cx ) == "2" )
 assert( cx:tostring() == 2 )
-cx = complex "2^2+3/2i"
-assert( tostring( cx ) == "4+1.5i" )
-cx = complex ".5-2E-3i"
-assert( tostring( cx ) == "0.5-0.002i" )
-cx = complex "3i"
-assert( tostring( cx ) == "3i" )
+--old:no longer supported: assert( tostring(complex '2^2+3/2i') == '4+1.5i' )
+assert( tostring( complex '.5-2E-3i' ) == '0.5-0.002i' )
+assert( tostring( complex '0' ) == '0' )
+assert( tostring( complex '10' ) == '10' )
+assert( tostring( complex '10.2' ) == '10.2' )
+assert( tostring( complex '-10.2' ) == '-10.2' )
+assert( tostring( complex '-10.2e2' ) == '-1020' )
+assert( tostring( complex '-10.2E+02' ) == '-1020' )
+assert( tostring( complex 'i' ) == 'i' )
+assert( tostring( complex '-i' ) == '-i' )
+assert( tostring( complex '3i' ) == '3i' )
+assert( tostring( complex '-3i' ) == '-3i' )
+assert( tostring( complex '0-3i' ) == '-3i' )
+assert( tostring( complex '1/+2+3/-4i' ) == '0.5-0.75i' )
+assert( tostring( complex '1e+0/2.0-1e0/2.0i' ) == '0.5-0.5i' )
+-- bad formatting
+assert( not pcall(complex, '') )
+assert( not pcall(complex, '2 + 4i') ) -- space
+assert( not pcall(complex, '1+2i ') ) -- space
+assert( not pcall(complex, 'i+1') ) -- reversed
+assert( tostring(complex'2 ') == '2' ) --ok (space, not invoking tonumber directly)
+assert( not pcall(complex, '-') )
+assert( not pcall(complex, '++1') )
+assert( not pcall(complex, '1/2/3') ) -- multiple operations
+
+--
 cx = complex "2"
 assert( tostring( cx ) == "2" )
 assert( cx:tostring() == 2 )
-assert( complex "2 + 4i" == nil )
 
 -- complex.new
 cx = complex.new( 2,3 )
