@@ -135,6 +135,21 @@ mtxinvcomp = matrix( mtxinvcomp )
 mtxinv:round( 5 )
 mtxinv = mtxinv:elementstostrings()
 assert( mtxinvcomp == mtxinv  )
+-- Fixed in v0.2.11 failed (Gauss-Jordan)
+local mtx = matrix {{ 1, -1,  1 }, {-1,  1,  0 }, { 1,  0,  0 } }
+assert((mtx^-1)^-1 == mtx)
+-- Fixed in v0.2.11 failed (Gauss-Jordan)
+local mtx = matrix {{ 0,  0,  1 }, { 0,  1,  0 }, { 1,  0,  0 } }
+assert((mtx^-1)^-1 == mtx)
+-- similar to above but with complex
+local mtx = matrix.replace({{ 0,  0,  "1i" }, { 0,  "1i",  0 }, { "1i",  0,  0 } }, complex)
+assert((mtx^-1)^-1 == mtx)
+-- random
+for i=1,10 do
+  local mtx = matrix(4, 4):random(-20, 20, 5)
+  assert(matrix.normmax((mtx^-1)^-1 - mtx) < 1E-13)
+end
+
 
 -- matrix.sqrt; number
 local m1 = matrix{{4,2,1},{1,5,4},{1,5,2}}

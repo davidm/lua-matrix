@@ -17,6 +17,12 @@ luamatrix").
 
 http://lua-users.org/wiki/LuaMatrix
 
+== Credits ==
+
+Authors: Michael Lutz (original author), David Manura (maintainer).
+Bug fixes/comments: Geoff Richards, SatheeshJM, Martin Ossmann,
+and others.
+
 == License ==
 
 See the LICENSE.txt file for licensing details.

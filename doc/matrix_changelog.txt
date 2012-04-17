@@ -1,6 +1,9 @@
 matrix changelog
 
-v 0.2.10
+v 0.2.11.20120416
+	- Gauss-Jordan bug fix.  Also affects matrix inverse.
+
+v 0.2.10.20111203
 	- Add _VERSION to modules.
 
 v 0.2.9: 2008-08-26

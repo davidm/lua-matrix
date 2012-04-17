@@ -114,7 +114,7 @@ LICENSE
 --// matrix //
 --////////////
 
-local matrix = {_TYPE='module', _NAME='matrix', _VERSION='0.2.10.20111203'}
+local matrix = {_TYPE='module', _NAME='matrix', _VERSION='0.2.11.20120416'}
 
 -- access to the metatable we set at the end of the file
 local matrix_meta = {}
@@ -416,35 +416,29 @@ end
 -- returns on failure: false,'rank of matrix'
 
 -- locals
--- checking here for the nearest element to 1 or -1; (smallest pivot element)
--- this way the factor of the evolving number division should be > 1 or the
--- divided number itself, what gives better results
-local setelementtosmallest = function( mtx,i,j,zero,one,norm2 )
-	-- check if element is one
-	if mtx[i][j] == one then return true end
-	-- check for lowest value
-	local _ilow
+-- checking here for the element nearest but not equal to zero (smallest pivot element).
+-- This way the `factor` in `dogauss` will be >= 1, which
+-- can give better results.
+local pivotOk = function( mtx,i,j,norm2 )
+	-- find min value
+	local iMin
+	local normMin = math.huge
 	for _i = i,#mtx do
 		local e = mtx[_i][j]
-		if e == one then
-			break
-		end
-		if not _ilow then
-			if e ~= zero then
-				_ilow = _i
+		local norm = math.abs(norm2(e))
+		if norm > 0 and norm < normMin then
+			iMin = _i
+			normMin = norm
 			end
-		elseif (e ~= zero) and math.abs(norm2(e)-1) < math.abs(norm2(mtx[_ilow][j])-1) then
-			_ilow = _i
 		end
-	end
-	if _ilow then
-		-- switch lines if not input line
-		-- legal operation
-		if _ilow ~= i then
-			mtx[i],mtx[_ilow] = mtx[_ilow],mtx[i]
+	if iMin then
+		-- switch lines if not in position.
+		if iMin ~= i then
+			mtx[i],mtx[iMin] = mtx[iMin],mtx[i]
 		end
 		return true
-	end
+		end
+	return false
 end
 
 local function copy(x)
@@ -463,7 +457,7 @@ function matrix.dogauss( mtx )
 	-- stairs left -> right
 	for j = 1,rows do
 		-- check if element can be setted to one
-		if setelementtosmallest( mtx,j,j,zero,one,norm2 ) then
+		if pivotOk( mtx,j,j,norm2 ) then
 			-- start parsing rows
 			for i = j+1,rows do
 				-- check if element is not already zero
@@ -540,7 +534,7 @@ function matrix.invert( m1 )
 end
 
 --// matrix.sqrt ( m1 [,iters] )
--- calculate the square root of a matrix using "Denman–Beavers square root iteration"
+-- calculate the square root of a matrix using "Denman Beavers square root iteration"
 -- condition: matrix rows == matrix columns; must have a invers matrix and a square root
 -- if called without additional arguments, the function finds the first nearest square root to
 -- input matrix, there are others but the error between them is very small
