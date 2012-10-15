@@ -123,7 +123,7 @@ local matrix_meta = {}
 --// Get 'new' matrix object //
 --/////////////////////////////
 
---// matrix:new ( rows [, comlumns [, value]] )
+--// matrix:new ( rows [, columns [, value]] )
 -- if rows is a table then sets rows as matrix
 -- if rows is a table of structure {1,2,3} then it sets it as a vector matrix
 -- if rows and columns are given and are numbers, returns a matrix with size rowsxcolumns
