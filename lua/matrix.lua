@@ -134,7 +134,11 @@ function matrix:new( rows, columns, value )
 	if type( rows ) == "table" then
 		-- check for vector
 		if type(rows[1]) ~= "table" then -- expect a vector
-			return setmetatable( {{rows[1]},{rows[2]},{rows[3]}},matrix_meta )
+			local o = {}
+			for i,v in ipairs(rows) do
+				o[i] = {v}
+			end
+			return setmetatable( o,matrix_meta )
 		end
 		return setmetatable( rows,matrix_meta )
 	end
@@ -188,6 +192,43 @@ setmetatable( matrix, { __call = function( ... ) return matrix.new( ... ) end } 
 --		real and symbolic matrices may also be added, subtracted, etc.
 --		but one should avoid using symbolic matrices with complex ones
 --		since it is not clear which metatable then is used
+
+
+local segment = {}
+
+function segment:__index(base_row)
+	local o = matrix(self.size,1)
+	for i=1,self.size do
+		o[i][1] = self.matrix[base_row+i-1][1]
+	end
+	return o
+end
+
+function segment:__newindex(base_row, o)
+	assert(self.size == #o)
+	for i=1,self.size do
+		self.matrix[base_row+i-1] = o[i]
+	end
+end
+
+function matrix:segment(size)
+	local o = {matrix=self, size=size}
+	return setmetatable(o, segment)
+end
+
+function matrix:x()
+	return self[1][1]
+end
+function matrix:y()
+	return self[2][1]
+end
+function matrix:z()
+	return self[3][1]
+end
+function matrix:w()
+	return self[4][1]
+end
+
 
 --// matrix.add ( m1, m2 )
 -- Add two matrices; m2 may be of bigger size than m1
