@@ -108,13 +108,14 @@ LICENSE
   Developers:
     Michael Lutz (chillcode) - original author
     David Manura http://lua-users.org/wiki/DavidManura
+    
 --]]
 
 --////////////
 --// matrix //
 --////////////
 
-local matrix = {_TYPE='module', _NAME='matrix', _VERSION='0.2.11.20120416'}
+local matrix = {_TYPE='module', _NAME='matrix', _VERSION='0.2.12.20131208'}
 
 -- access to the metatable we set at the end of the file
 local matrix_meta = {}
@@ -129,14 +130,23 @@ local matrix_meta = {}
 -- if rows and columns are given and are numbers, returns a matrix with size rowsxcolumns
 -- if num is given then returns a matrix with given size and all values set to num
 -- if rows is given as number and columns is "I", will return an identity matrix of size rowsxrows
+-- is rows is a table with `astable` defined, sets row:astable() as matrix
 function matrix:new( rows, columns, value )
 	-- check for given matrix
 	if type( rows ) == "table" then
 		-- check for vector
 		if type(rows[1]) ~= "table" then -- expect a vector
-			return setmetatable( {{rows[1]},{rows[2]},{rows[3]}},matrix_meta )
+      local m = {}
+      for k, v in ipairs(rows) do
+        m[k] = {v}
+      end
+			return setmetatable( m,matrix_meta )
 		end
-		return setmetatable( rows,matrix_meta )
+    if rows.astable then
+		  return setmetatable( rows:astable(),matrix_meta )
+    else
+		  return setmetatable( rows,matrix_meta )
+    end
 	end
 	-- get matrix table
 	local mtx = {}
@@ -981,29 +991,40 @@ end
 --// matrix 'vector' functions //
 --///////////////////////////////
 
--- a vector is defined as a 3x1 matrix
--- get a vector; vec = matrix{{ 1,2,3 }}^'T'
+-- a vector is defined as a Nx1 matrix
+-- get a vector; vec = matrix{ 1,2,3 }
 
 --// matrix.scalar ( m1, m2 )
--- returns the Scalar Product of two 3x1 matrices (vectors)
+-- returns the Scalar Product of two Nx1 matrices (vectors)
 function matrix.scalar( m1, m2 )
-	return m1[1][1]*m2[1][1] + m1[2][1]*m2[2][1] +  m1[3][1]*m2[3][1]
+  local s=0
+  for i=1, #m1 do
+    s = s + m1[i][1]*m2[i][1]
+  end
+  return s
 end
 
 --// matrix.cross ( m1, m2 )
--- returns the Cross Product of two 3x1 matrices (vectors)
+-- returns the Cross Product of two 3x1 or 4x1 matrices (vectors)
 function matrix.cross( m1, m2 )
 	local mtx = {}
 	mtx[1] = { m1[2][1]*m2[3][1] - m1[3][1]*m2[2][1] }
 	mtx[2] = { m1[3][1]*m2[1][1] - m1[1][1]*m2[3][1] }
 	mtx[3] = { m1[1][1]*m2[2][1] - m1[2][1]*m2[1][1] }
+  if m1[4] then 
+    mtx[4] = 0
+  end
 	return setmetatable( mtx, matrix_meta )
 end
 
 --// matrix.len ( m1 )
--- returns the Length of a 3x1 matrix (vector)
+-- returns the Length of a Nx1 matrix (vector)
 function matrix.len( m1 )
-	return math.sqrt( m1[1][1]^2 + m1[2][1]^2 + m1[3][1]^2 )
+  local s=0
+  for i=1, #m1 do
+    s = s + m1[i][1]^2
+  end
+  return math.sqrt(s)
 end
 
 
@@ -1249,3 +1270,4 @@ return matrix
 --///////////////--
 --// chillcode //--
 --///////////////--
+
