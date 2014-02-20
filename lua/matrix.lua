@@ -415,30 +415,37 @@ end
 -- returns on success: true,
 -- returns on failure: false,'rank of matrix'
 
+
 -- locals
--- checking here for the element nearest but not equal to zero (smallest pivot element).
--- This way the `factor` in `dogauss` will be >= 1, which
--- can give better results.
+-- perform an in-place pivot on the given matrix, if possible,
+-- returning whether or not a pivot was done
+
+-- we choose the pivot element by checking for the largest element in a column,
+-- with an index greater than a specified starting point
+-- mtx - the matrix to pivot
+-- i - the row to start scan for pivot on
+-- j - the column to scan for a pivot in
+-- norm2 - a function which gives the square of the norm for a matrix element
 local pivotOk = function( mtx,i,j,norm2 )
-	-- find min value
-	local iMin
-	local normMin = math.huge
+	-- find max value
+	local iMax
+	local normMax = 0
 	for _i = i,#mtx do
 		local e = mtx[_i][j]
 		local norm = math.abs(norm2(e))
-		if norm > 0 and norm < normMin then
-			iMin = _i
-			normMin = norm
+		if norm > normMax then
+			iMax = _i
+			normMax = norm
 			end
 		end
-	if iMin then
-		-- switch lines if not in position.
-		if iMin ~= i then
-			mtx[i],mtx[iMin] = mtx[iMin],mtx[i]
+	if iMax then
+		-- switch rows, if not in position.
+		if iMax ~= i then
+			mtx[i],mtx[iMax] = mtx[iMax],mtx[i]
 		end
 		return true
-		end
-	return false
+	end
+	return false -- column was all zeros below pivot
 end
 
 local function copy(x)
