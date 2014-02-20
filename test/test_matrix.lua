@@ -4,6 +4,23 @@ local symbol = matrix.symbol
 
 local mtx, m1,m2,m3,m4,m5, ms,ms1,ms2,ms3,ms4
 
+-- compare matrices of floats using epsilon = 1e-9
+-- not perfect, but better than '=='
+-- improvements can be found here: http://stackoverflow.com/a/3423299/74291
+function matrix.fcompare(m1, m2)
+	local eps = 0.000000001
+	mtx = {}
+	for i = 1,#m1 do
+		mtx[i] = {}
+		for j = 1,#m1[1] do
+			if math.abs(m1[i][j] - m2[i][j]) > eps then
+				return false
+			end
+		end
+	end
+	return true
+end
+
 -- test matrix:new/matrix call function
 -- normal matrix
 mtx = matrix {{1,2},{3,4}}
@@ -72,7 +89,7 @@ assert( m1*m2^-1 == m1/m2 )
 m2 = matrix {{4,5},{6,7}}
 assert( m2/2 == matrix{{2,2.5},{3,3.5}} )
 mtx = matrix {{3,5,1},{2,4,5},{1,2,2}}
-assert( 2 / mtx == matrix{{4,16,-42},{-2,-10,26},{0,2,-4}} )
+assert( matrix.fcompare( 2 / mtx, matrix{{4,16,-42},{-2,-10,26},{0,2,-4}} ) )
 -- matrix.mulnum; symbol
 m1 = m1:replace(symbol)
 assert( m1*2 == matrix{{"(1)*(2)","(2)*(2)"},{"(3)*(2)","(4)*(2)"}}:replace(symbol) )
@@ -114,11 +131,11 @@ assert( mtx:det():round(10) == complex "5527+2687i" )
 --1
 mtx = matrix{{3,5,1},{2,4,5},{1,2,2}}
 local mtxinv = matrix{{2,8,-21},{-1,-5,13},{0,1,-2}}
-assert( mtx^-1 == mtxinv )
+assert( matrix.fcompare( mtx^-1, mtxinv) )
 --2
 mtx = matrix{{1,0,2},{4,1,1},{3,2,-7}} 
 local mtxinv = matrix{{-9,4,-2},{31,-13,7},{5,-2,1}}
-assert( mtx^-1 == mtxinv )
+assert( matrix.fcompare( mtx^-1, mtxinv) )
 -- matrix.invert; complex
 mtx = {
 { 3,"4-3i",1},
