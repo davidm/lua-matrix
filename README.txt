@@ -11,7 +11,8 @@ as well as the test suite.
 
 To install, copy matrix.lua and complex.lua into your LUA_PATH.  The
 modules can alternately be installed via LuaRocks ("luarocks install
-luamatrix").
+luamatrix"). Or, run "./util.mk; cd tmp/*; luarocks make" from a local
+clone.
 
 == Project Page ==
 
