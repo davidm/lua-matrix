@@ -13,6 +13,5 @@ test/test_matrix.lua
 test/test_fit.lua
 test/test_complex.lua
 doc/complex_changelog.txt
-doc/fit_changelog.txt
 doc/matrix_changelog.txt
 samples/fit.lua
