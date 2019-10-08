@@ -506,7 +506,7 @@ function matrix.dogauss( mtx )
 end
 
 --// matrix.invert ( m1 )
--- Get the inverted matrix or m1
+-- Get the inverted matrix of m1
 -- matrix must be square and not singular
 -- on success: returns inverted matrix
 -- on failure: returns nil,'rank of matrix'
@@ -531,6 +531,90 @@ function matrix.invert( m1 )
 	else
 		return nil,rank
 	end
+end
+
+--// matrix.invert ( m1 )
+-- Get the inverted matrix of m1 using LU decomposition
+-- epsilon is a small tolorance determining if the matrix is degenerate. 
+-- matrix must be square and not singular
+-- on success: returns inverted matrix
+-- on failure: returns nil
+function matrix.invertLU( m1, epsilon )
+	assert(#m1 == #m1[1], "matrix not square")
+	epsilon = epsilon or 1e-10
+	local A = matrix.copy( m1 )
+	local IA = setmetatable({}, matrix_meta )
+	for i = 1, #m1 do
+		IA[i] = {}
+	end
+	local zero, one, abs
+	if type(m1[1][1]) == "table" then
+		zero = e.zero
+		one = e.one
+		abs = e.norm2
+	else
+		zero = 0
+		one = 1
+		abs = math.abs
+	end
+
+	local P = {}
+	for i = 1, #m1 do
+		P[i] = i
+	end
+
+	for i = 1, #m1 do
+		local maxA = 0.0
+		local imax = i
+
+		for k = i, #m1 do
+			local absA = abs(A[k][i])
+			if absA > maxA then
+				maxA = absA
+				imax = k
+			end
+		end
+
+		if (maxA < epsilon) then return end --failure, matrix is degenerate
+
+		if imax ~= i then
+			--pivoting P
+			P[i], P[imax] = P[imax], P[i]
+			--pivoting rows of A
+			A[i], A[imax] = A[imax], A[i]
+		end
+
+		for j = i + 1, #m1 do
+			A[j][i] = A[j][i] / A[i][i]
+
+			for k = i + 1, #m1 do
+				A[j][k] = A[j][k] - A[j][i] * A[i][k]
+			end
+		end
+	end
+
+	for j = 1, #m1 do
+		for i = 1, #m1 do
+			if P[i] == j then
+				IA[i][j] = 1.0
+			else
+				IA[i][j] = 0.0
+			end
+			
+			for k = 1, i-1 do
+				IA[i][j] = IA[i][j] - A[i][k] * IA[k][j]
+			end
+		end
+
+		for i = #m1, 1, -1 do
+			for k = i + 1, #m1 do
+				IA[i][j] = IA[i][j] - A[i][k] * IA[k][j]
+			end
+			IA[i][j] = IA[i][j] / A[i][i]
+		end
+	end
+
+	return IA
 end
 
 --// matrix.sqrt ( m1 [,iters] )
