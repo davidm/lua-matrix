@@ -740,9 +740,9 @@ end
 function matrix.copy( m1 )
 	local docopy = matrix.type( m1 ) == "number" and num_copy or t_copy
 	local mtx = {}
-	for i = 1,#m1[1] do
+	for i = 1,#m1 do
 		mtx[i] = {}
-		for j = 1,#m1 do
+		for j = 1,#m1[1] do
 			mtx[i][j] = docopy( m1[i][j] )
 		end
 	end
